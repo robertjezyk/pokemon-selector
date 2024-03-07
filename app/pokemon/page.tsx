@@ -87,7 +87,7 @@ const PokemonPage = () => {
               router.push(pathname + "?" + createQueryString("id", inputValue));
             }}
             className="rounded-tl-none rounded-bl-none"
-            disabled={valueOutOfRange}
+            disabled={valueOutOfRange || isFetching}
           >
             Find Pokemon
           </Button>
