@@ -60,6 +60,11 @@ const PokemonPage = () => {
     [searchParams]
   );
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    router.push(pathname + "?" + createQueryString("id", inputValue));
+  };
+
   if (error) {
     return <NotFound resetInput={() => setInputValue(undefined)} />;
   }
@@ -71,7 +76,7 @@ const PokemonPage = () => {
   return (
     <div className="p-24">
       <div className="relative pb-4">
-        <div className="flex w-[400px]">
+        <form onSubmit={handleSubmit} className="flex w-[400px]">
           <Input
             placeholder="Enter number between 1 and 151"
             defaultValue={inputValue}
@@ -83,15 +88,12 @@ const PokemonPage = () => {
           />
           <Button
             type="submit"
-            onClick={() => {
-              router.push(pathname + "?" + createQueryString("id", inputValue));
-            }}
             className="rounded-tl-none rounded-bl-none"
             disabled={valueOutOfRange || isFetching}
           >
             Find Pokemon
           </Button>
-        </div>
+        </form>
         {valueOutOfRange && (
           <span className="mt-2 pl-4 block text-sm text-rose-500 absolute">
             Value out of range. Enter number between 1 and 151
