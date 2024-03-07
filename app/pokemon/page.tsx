@@ -1,16 +1,30 @@
 "use client";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState } from "react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PokemonCard } from "@/components/PokemonCard";
+import { PokemonLoadingCard } from "@/components/PokemonLoadingCard";
 import { NotFound } from "@/components/NotFound";
-
-import type { Pokemon } from "@/app/types";
 
 const MIN_POKEMON_ID = 1;
 const MAX_POKEMON_ID = 151;
+
+const getPokemon = async (pokemonId?: string) => {
+  try {
+    if (pokemonId) {
+      const response = await fetch(
+        `https://pokeapi.co/api/v2/pokemon/${pokemonId}`
+      );
+
+      return response.json();
+    }
+  } catch (error) {
+    console.error("Error fetching Pokemon:", error);
+  }
+};
 
 const PokemonPage = () => {
   const searchParams = useSearchParams();
@@ -18,34 +32,18 @@ const PokemonPage = () => {
   const pathname = usePathname();
   const id = searchParams.get("id") || undefined;
 
+  const {
+    data: pokemon,
+    error,
+    isFetching,
+    status,
+  } = useQuery({
+    queryKey: ["pokemon", id],
+    queryFn: () => getPokemon(id),
+    enabled: !!id,
+  });
+
   const [inputValue, setInputValue] = useState(id);
-  const [pokemon, setPokemon] = useState<Pokemon | null>(null);
-  const [networkError, setNetworkError] = useState<string | unknown | null>(
-    null
-  );
-
-  const getPokemon = async (pokemonId: string) => {
-    try {
-      const response = await fetch(
-        `https://pokeapi.co/api/v2/pokemon/${pokemonId}`
-      );
-
-      if (response) {
-        const data = await response.json();
-        setPokemon(data);
-        setNetworkError(null);
-      }
-    } catch (networkError) {
-      console.error("Error fetching Pokemon:", networkError);
-      setNetworkError(networkError);
-    }
-  };
-
-  useEffect(() => {
-    if (id) {
-      getPokemon(id);
-    }
-  }, [id]);
 
   const createQueryString = useCallback(
     (name: string, value: string | undefined) => {
@@ -55,7 +53,6 @@ const PokemonPage = () => {
         params.set(name, value);
       } else {
         params.delete(name);
-        setPokemon(null);
       }
 
       return params.toString();
@@ -63,8 +60,8 @@ const PokemonPage = () => {
     [searchParams]
   );
 
-  if (networkError) {
-    return <NotFound setError={setNetworkError} />;
+  if (error) {
+    return <NotFound resetInput={() => setInputValue(undefined)} />;
   }
 
   const valueOutOfRange =
@@ -101,7 +98,8 @@ const PokemonPage = () => {
           </span>
         )}
       </div>
-      {pokemon && <PokemonCard pokemon={pokemon} />}
+      {isFetching && <PokemonLoadingCard />}
+      {pokemon && !isFetching && <PokemonCard pokemon={pokemon} />}
     </div>
   );
 };
