@@ -1,7 +1,9 @@
 "use client";
 import { useCallback, useState } from "react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { HomeModernIcon } from "@heroicons/react/24/outline";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,35 +76,40 @@ const PokemonPage = () => {
     (parseInt(inputValue, 10) < 1 || parseInt(inputValue, 10) > 151);
 
   return (
-    <div className="p-24">
-      <div className="relative pb-4">
-        <form onSubmit={handleSubmit} className="flex w-[400px]">
-          <Input
-            placeholder="Enter number between 1 and 151"
-            defaultValue={inputValue}
-            type="number"
-            min={MIN_POKEMON_ID}
-            max={MAX_POKEMON_ID}
-            onChange={(e) => setInputValue(e.target.value)}
-            className="rounded-tr-none rounded-br-none"
-          />
-          <Button
-            type="submit"
-            className="rounded-tl-none rounded-bl-none"
-            disabled={valueOutOfRange || isFetching}
-          >
-            Find Pokemon
-          </Button>
-        </form>
-        {valueOutOfRange && (
-          <span className="mt-2 pl-4 block text-sm text-rose-500 absolute">
-            Value out of range. Enter number between 1 and 151
-          </span>
-        )}
+    <>
+      <Link href="/" className="ml-24 mt-8 block">
+        <HomeModernIcon className="w-10" />
+      </Link>
+      <div className="p-24 pt-8">
+        <div className="relative pb-4">
+          <form onSubmit={handleSubmit} className="flex w-[400px]">
+            <Input
+              placeholder="Enter number between 1 and 151"
+              defaultValue={inputValue}
+              type="number"
+              min={MIN_POKEMON_ID}
+              max={MAX_POKEMON_ID}
+              onChange={(e) => setInputValue(e.target.value)}
+              className="rounded-tr-none rounded-br-none"
+            />
+            <Button
+              type="submit"
+              className="rounded-tl-none rounded-bl-none"
+              disabled={valueOutOfRange || isFetching}
+            >
+              Find Pokemon
+            </Button>
+          </form>
+          {valueOutOfRange && (
+            <span className="mt-2 pl-4 block text-sm text-rose-500 absolute">
+              Value out of range. Enter number between 1 and 151
+            </span>
+          )}
+        </div>
+        {isFetching && <PokemonLoadingCard />}
+        {pokemon && !isFetching && <PokemonCard pokemon={pokemon} />}
       </div>
-      {isFetching && <PokemonLoadingCard />}
-      {pokemon && !isFetching && <PokemonCard pokemon={pokemon} />}
-    </div>
+    </>
   );
 };
 
