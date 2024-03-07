@@ -10,6 +10,9 @@ const nextConfig = {
       },
     ],
   },
+  experimental: {
+    missingSuspenseWithCSRBailout: false, // TODO: remove flg and implement Suspense for useSearchParams
+  },
 };
 
 export default nextConfig;
